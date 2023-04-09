@@ -1,10 +1,10 @@
 # Angry Metal Guy to Spotify
 
-I've been accessing https://www.angrymetalguy.com/ (AMG) for many years. Unfortunately, these days I simply don't have to time to read/listen to every single band featured on the website... so I built this small project to scrape reviews and add the albums to my spotify playlist.
+I've been reading the [Angry Metal Guy](https://www.angrymetalguy.com/) website (AMG) for many years. They do _lots_ of metal album reviews and over the years I've discovered many awesome bands though their work.
+
+Unfortunately, these days I simply don't have to time to read/listen to every single band featured on the website... so I built this small project to scrape reviews and add the albums to my spotify playlist.
 
 The [playlist](https://open.spotify.com/playlist/52a8LeWcFcYtHhGMHJooHN?si=ccc94e86a9e049f3) is open to public, so feel free to follow if you don't wanna deal with all the tech stuff. Beware that I might remove any of the albums that I've already listened/disliked at will (note that the app can add to both public and private playlists, no restrictions).
-
-And I know there's a lot of controversy about "scores" on a website not being the best indicator of the quality of an album. However, if any of the reviewers in AMG give a album 3.5+, I know I'll at least _try_ to listen to that release. So I see this app more of an "automation for stuff I know I was going to listen anyway" vs. "list of THE best releases of the week". I also made sure to make this as configurable as possible - you can decrease the score cutoff to whatever you like, even potentially creating an instance that adds _everything_ that gets reviewed to a playlist.
 
 ![Scraping-Adding-To-Spotify-Image](docs/spotipy-adding.png)
 
@@ -56,6 +56,12 @@ Add the values you have in your local `.env` file as Environment Variables in th
 Note that you **must** have a local `.cache-*` file created before uploading this to lambda, otherwise spotipy _won't_ work. I'd rather have this as an env vars or something, but couldn't find any alternatives. It's a compromise, but this file only holds a temporary key that expires very quickly, refreshing every new time you try to access by using your ClientID + ClientSecret. The scope of the access is also decrease as much as possible (can only modify playlists and nothing else).
 
 EventBridge should be easy to configure once you have your lambda up. Just go to _Schedules_ and add a new Cron Expression, using your lambda as the target.
+
+## About "Scores"
+
+I know there's a lot of controversy about "scores" on a website not being the best indicator of the quality of an album. However, if any of the reviewers in AMG give a album 3.5+, I know I'll at least _try_ to listen to that release. So I see this app more of an "automation for stuff I know I was going to listen anyway" vs. "list of THE best releases of the week".
+
+I made sure to make this as configurable as possible - you can decrease the score cutoff to whatever you like, even potentially creating an instance that adds _everything_ that gets reviewed to a playlist (though you might have issues with the format of the posts changing over the years).
 
 ## TODOs
 
