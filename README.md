@@ -37,7 +37,7 @@ Click on that link, authenticate to Spotify in your browser and paste the redire
 
 Now all is left is to find your target playlist id (`SPOTIFY_PLAYLIST_ID`). To do this:
 - Right-Click the playlist in spotify and choose _Share_ -> _Copy link to playlist_.
-- The highlighted portion of the link is the playlist id: https://open.spotify.com/playlist/**52a8LeWcFcYtHhGMHJooHN**?si=9c4eea62db564db7
+- The part after `/playlist/` and before `?` is the playlist id. So for https://open.spotify.com/playlist/52a8LeWcFcYtHhGMHJooHN?si=9c4eea62db564db7, the id is `52a8LeWcFcYtHhGMHJooHN`.
 
 ### Configuration
 
