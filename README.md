@@ -1,8 +1,8 @@
 # Angry Metal Guy to Spotify
 
-This project adds reviews from https://www.angrymetalguy.com/ to spotify playlists. The process runs once every Sunday morning (EST) and updates all the playlists. All playlists are Public, created under my own username, and **can be accessed by anyone**.
+This project periodically adds reviews from https://www.angrymetalguy.com/ to spotify playlists. The process runs once every Sunday morning (EST).
 
-Execution is made via AWS Lambda, triggered by Amazon EventBridge. Secrets (like spotify creds) are configured in a `.env` file for local dev, and as environment variables inside AWS Lambda. Deployment is made via `make lambda-deploy`.
+All playlists are public, created under my own username, and **can be accessed by anyone**.
 
 ## Rotation Playlist
 
@@ -36,7 +36,7 @@ Spotify might add, remove, or re-add albums to its catalog at any time. So if an
 
 ## Setup
 
-Follow this section if you want to try running this project locally.
+Follow this section if you want to try running this project locally. Feel free to skip if all you care about are playlists!
 
 Before we get into specifics, here's an overview of some of the tools that are used by this project:
 
