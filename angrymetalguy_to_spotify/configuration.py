@@ -13,14 +13,23 @@ SPOTIFY_USERNAME = os.environ["SPOTIFY_USERNAME"]
 SPOTIFY_REDIRECT_URI = os.environ["SPOTIFY_REDIRECT_URI"]
 
 # Playlist that will get the albums
-SPOTIFY_PLAYLIST_ID = os.environ["SPOTIFY_PLAYLIST_ID"]
-
-# Only scores above this number will be added to the playlist
-SCORE_CUTOFF = float(os.environ["SCORE_CUTOFF"])
+SPOTIFY_PLAYLIST_00_ID = os.environ["SPOTIFY_PLAYLIST_00_ID"]
+SPOTIFY_PLAYLIST_05_ID = os.environ["SPOTIFY_PLAYLIST_05_ID"]
+SPOTIFY_PLAYLIST_10_ID = os.environ["SPOTIFY_PLAYLIST_10_ID"]
+SPOTIFY_PLAYLIST_15_ID = os.environ["SPOTIFY_PLAYLIST_15_ID"]
+SPOTIFY_PLAYLIST_20_ID = os.environ["SPOTIFY_PLAYLIST_20_ID"]
+SPOTIFY_PLAYLIST_25_ID = os.environ["SPOTIFY_PLAYLIST_25_ID"]
+SPOTIFY_PLAYLIST_30_ID = os.environ["SPOTIFY_PLAYLIST_30_ID"]
+SPOTIFY_PLAYLIST_35_ID = os.environ["SPOTIFY_PLAYLIST_35_ID"]
+SPOTIFY_PLAYLIST_40_ID = os.environ["SPOTIFY_PLAYLIST_40_ID"]
+SPOTIFY_PLAYLIST_45_ID = os.environ["SPOTIFY_PLAYLIST_45_ID"]
+SPOTIFY_PLAYLIST_50_ID = os.environ["SPOTIFY_PLAYLIST_50_ID"]
+SPOTIFY_PLAYLIST_ALL_ID = os.environ["SPOTIFY_PLAYLIST_ALL_ID"]
+SPOTIFY_PLAYLIST_ROTATION_ID = os.environ["SPOTIFY_PLAYLIST_ROTATION_ID"]
 
 # Number of pages to scan for reviews
 NUMBER_OF_PAGES = int(os.environ["NUMBER_OF_PAGES"])
 
-# Scraping will always ignore parsing errors, but those can be useful for debugging.
-# However, if deploying this to aws lambda you have to skip `logging.exception`
+# Errors can be useful for local debugging, but we must skip any issues when
+# running inside the lambda. If this is `True`, skips Exceptions during scraping
 SUPRESS_SCRAPING_ERRORS = bool(os.environ["SUPRESS_SCRAPING_ERRORS"])

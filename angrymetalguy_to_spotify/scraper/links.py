@@ -1,7 +1,7 @@
 from typing import List
 
-from .constants import BASE_URL
-from .utils import soup
+from angrymetalguy_to_spotify.constants import BASE_URL
+from angrymetalguy_to_spotify.scraper.utils import soup
 
 
 def get_posts_links(number_of_pages: int) -> List[str]:

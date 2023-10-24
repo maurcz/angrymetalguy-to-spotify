@@ -1,37 +1,97 @@
-import logging
 import sys
-from typing import Any, Dict, Set
+from typing import Dict, List
 
 import spotipy
 import spotipy.util as util
 
 from angrymetalguy_to_spotify.configuration import (
-    SCORE_CUTOFF,
     SPOTIFY_CLIENT_ID,
     SPOTIFY_CLIENT_SECRET,
-    SPOTIFY_PLAYLIST_ID,
+    SPOTIFY_PLAYLIST_00_ID,
+    SPOTIFY_PLAYLIST_05_ID,
+    SPOTIFY_PLAYLIST_10_ID,
+    SPOTIFY_PLAYLIST_15_ID,
+    SPOTIFY_PLAYLIST_20_ID,
+    SPOTIFY_PLAYLIST_25_ID,
+    SPOTIFY_PLAYLIST_30_ID,
+    SPOTIFY_PLAYLIST_35_ID,
+    SPOTIFY_PLAYLIST_40_ID,
+    SPOTIFY_PLAYLIST_45_ID,
+    SPOTIFY_PLAYLIST_50_ID,
+    SPOTIFY_PLAYLIST_ALL_ID,
+    SPOTIFY_PLAYLIST_ROTATION_ID,
     SPOTIFY_REDIRECT_URI,
     SPOTIFY_USERNAME,
 )
+from angrymetalguy_to_spotify.constants import DAYS_CUTOFF, SCORE_CUTOFF
+from angrymetalguy_to_spotify.spotify.manager import PlaylistManager
+from angrymetalguy_to_spotify.utils.logger import get_logger
+
+logger = get_logger()
 
 
-def add_to_playlist(reviews: Dict[str, Any]) -> None:
-    """Adds albums to a target spotify playlist. Albums that don't make the cut (via `SCORE_CUTOFF`)
-    are skipped.
+def add_to_playlist(reviews: Dict[float, List[Dict[str, str]]]) -> None:
+    """Adds albums to a target spotify playlist.
 
     Parameters
     ----------
-    reviews : Dict[str, Any]
-        metadata from scraped reviews
+    reviews : Dict[float, List[Dict[str, str]]]
+        metadata from scraped reviews, categorized by score
     """
+
     spotify = _connect()
-    albums_in_playlist = _get_albums_in_playlist(spotify)
 
-    for review in reviews:
-        if review["score"] < SCORE_CUTOFF:
-            continue
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_00_ID)
+    manager.add_to_playlist(reviews["0.0"])
 
-        _add_to_playlist(spotify, albums_in_playlist, review["band"], review["album"], review["score"])
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_05_ID)
+    manager.add_to_playlist(reviews["0.5"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_10_ID)
+    manager.add_to_playlist(reviews["1.0"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_10_ID)
+    manager.add_to_playlist(reviews["1.0"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_15_ID)
+    manager.add_to_playlist(reviews["1.5"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_20_ID)
+    manager.add_to_playlist(reviews["2.0"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_25_ID)
+    manager.add_to_playlist(reviews["2.5"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_30_ID)
+    manager.add_to_playlist(reviews["3.0"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_35_ID)
+    manager.add_to_playlist(reviews["3.5"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_40_ID)
+    manager.add_to_playlist(reviews["4.0"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_45_ID)
+    manager.add_to_playlist(reviews["4.5"])
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_50_ID)
+    manager.add_to_playlist(reviews["5.0"])
+
+    # Prepping data for "special" playlists
+    flattened = []
+    four_or_more = []
+    for key, value in reviews.items():
+        if float(key) >= SCORE_CUTOFF:
+            four_or_more += value
+
+        flattened += value
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_ALL_ID)
+    manager.add_to_playlist(flattened)
+
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_ROTATION_ID, old_albums_limit_in_days=DAYS_CUTOFF)
+    manager.add_to_playlist(four_or_more)
+    manager.remove_old_tracks()
 
 
 def _connect() -> spotipy.Spotify:
@@ -56,83 +116,7 @@ def _connect() -> spotipy.Spotify:
     )
 
     if token is None:
-        logging.error(f"Can't get token for {SPOTIFY_USERNAME}")
+        logger.error(f"Can't get token for {SPOTIFY_USERNAME}")
         sys.exit()
 
     return spotipy.Spotify(auth=token)
-
-
-def _get_albums_in_playlist(spotify: spotipy.Spotify) -> Set[str]:
-    """Gets albums currently in the playlist. This is necessary to avoid
-    issues down the line with duplicate inserts via the spotipy API.
-
-    Parameters
-    ----------
-    spotify : spotipy.Spotify
-        spotify connection object
-
-    Returns
-    -------
-    Set[str]
-        ids of albums already in the playlist
-    """
-
-    all_tracks = []
-    offset = 0
-    albums = set()
-
-    # There's a limit of 100 tracks per request. This `for` will *always* hit the `break`, unless
-    # the playlist has ~~922337203685477580700 tracks
-    for _ in range(0, sys.maxsize):
-        results = spotify.user_playlist_tracks(
-            user=SPOTIFY_USERNAME, playlist_id=SPOTIFY_PLAYLIST_ID, fields="items.track.album.id", offset=offset
-        )
-        all_tracks.extend(results["items"])
-        tracks_retrieved = len(results["items"])
-        if tracks_retrieved < 100:
-            break
-        offset += tracks_retrieved - 1
-
-    # No API to retrieve albums from playlists, just tracks.
-    # Simplifying deduping with a set.
-    for track in all_tracks:
-        albums.add(track["track"]["album"]["id"])
-
-    return albums
-
-
-def _add_to_playlist(spotify: spotipy.Spotify, albums_in_playlist: Set[str], band: str, album: str, score: float) -> None:
-    """Adds a target album to a playlist.
-
-    Tracks are inserted one by one. Once the "album id to be inserted" is retrieved, this function will skip
-    if the album is already in the playlist, avoiding insertion errors.
-
-    Parameters
-    ----------
-    spotify : spotipy.Spotify
-        spotify connection object
-    albums_in_playlist : Set[str]
-        ids of albums alredy in playlist
-    band : str
-        the band name
-    album : str
-        the album name
-    score : float
-        review score. only used for logging purposes.
-    """
-    results = spotify.search(q="album:" + album + " artist:" + band, limit=1, type="album")
-
-    for item in results["albums"]["items"]:
-        # Skips if album already in playlist
-        if item["id"] in albums_in_playlist:
-            logging.info(f"{band} - {album} ({score}) already in playlist.")
-            break
-
-        # No API to add an album by name, must add a group of tracks
-        tracks_ids = []
-        for track in spotify.album_tracks(item["id"])["items"]:
-            tracks_ids.append(track["id"])
-
-        spotify.user_playlist_add_tracks(SPOTIFY_USERNAME, SPOTIFY_PLAYLIST_ID, tracks_ids)
-
-        logging.info(f"{band} - {album} ({score}) added to playlist.")

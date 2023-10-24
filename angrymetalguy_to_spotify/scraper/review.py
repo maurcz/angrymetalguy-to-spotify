@@ -1,17 +1,19 @@
-import logging
 import re
 import unicodedata
-from typing import Any, Dict, List, Tuple
+from collections import defaultdict
+from typing import Dict, List, Tuple
 
 from bs4.element import Tag
 
 from angrymetalguy_to_spotify.configuration import SUPRESS_SCRAPING_ERRORS
+from angrymetalguy_to_spotify.constants import RATING_SYSTEM, UNKNOWN_SCORE_VALUE
+from angrymetalguy_to_spotify.scraper.utils import soup
+from angrymetalguy_to_spotify.utils.logger import get_logger
 
-from .constants import RATING_SYSTEM
-from .utils import soup
+logger = get_logger()
 
 
-def scrape_reviews(urls: List[str]) -> List[Dict[str, Any]]:
+def scrape_reviews(urls: List[str]) -> Dict[float, List[Dict[str, str]]]:
     """Scrape posts for album reviews. The process will ignore parsing errors
     and try to parse band/albums/scores from all urls.
 
@@ -22,16 +24,22 @@ def scrape_reviews(urls: List[str]) -> List[Dict[str, Any]]:
 
     Returns
     -------
-    List[Dict[str, Any]]
+    Dict[float, List[Dict[str, str]]
         list of reviews metadata
     """
-    result = []
+    result = defaultdict(list)
 
     for url in urls:
         post = soup(url)
         band, album = _parse_title(post.find("h1", class_="entry-title"))
+        score = _parse_score(post.find("div", class_="entry-content"))
 
-        result.append({"band": band, "album": album, "score": _parse_score(post.find("div", class_="entry-content"))})
+        # Deliberately skip albums that couldn't be scored. Some of the posts that are
+        # not reviews might also fall into this condition.
+        if score == UNKNOWN_SCORE_VALUE:
+            continue
+
+        result[score].append({"band": band, "album": album})
 
     return result
 
@@ -65,11 +73,11 @@ def _parse_title(entry_title: Tag) -> Tuple[str, str]:
         # Some posts are not reviews; returning empty as a signal for this to be
         # ignored when adding to spotify
         if not SUPRESS_SCRAPING_ERRORS:
-            logging.exception(ex)
+            logger.exception(ex)
         return "", ""
 
 
-def _parse_score(entry_content: Tag) -> float:
+def _parse_score(entry_content: Tag) -> str:
     """Tries to parse the score from a review post.
 
     Note that reviews can be floats or text; rever to constant `RATING_SYSTEM` for
@@ -82,7 +90,7 @@ def _parse_score(entry_content: Tag) -> float:
 
     Returns
     -------
-    float
+    str
         review score
     """
     # Some posts have annoying characters, normalizing. Also replacing weird line breaks.
@@ -96,10 +104,12 @@ def _parse_score(entry_content: Tag) -> float:
 
     try:
         score = rating.group(1).strip()
-        return float(score) if score not in RATING_SYSTEM else RATING_SYSTEM[score]
+        return score if score not in RATING_SYSTEM else RATING_SYSTEM[score]
     except Exception as ex:
-        # Some posts won't have ratings so we score them as 0.0
-        # This ensures it gets skipped according to the cutoff when adding to spotify
+        # Errors can be useful for local debugging, but we must skip any issues when
+        # running inside in AWS Lamba
         if not SUPRESS_SCRAPING_ERRORS:
-            logging.exception(ex)
-        return 0.0
+            logger.exception(ex)
+
+        # If any issues occur during parsing, just mark the score as "unknown"
+        return UNKNOWN_SCORE_VALUE

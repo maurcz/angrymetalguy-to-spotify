@@ -1,11 +1,7 @@
-import logging
-
 from angrymetalguy_to_spotify.configuration import NUMBER_OF_PAGES
 from angrymetalguy_to_spotify.scraper.links import get_posts_links
 from angrymetalguy_to_spotify.scraper.review import scrape_reviews
 from angrymetalguy_to_spotify.spotify.playlist import add_to_playlist
-
-logging.basicConfig(level=logging.INFO)
 
 
 def lambda_start(event, context):

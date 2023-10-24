@@ -7,14 +7,24 @@ FILES:=$(TOP_LEVEL_SCRIPTS) $(shell find ./$(PACKAGE_NAME) -name '*.py')
 .PHONY: check format lambda-deploy venv
 
 .env:
-	@echo "SPOTIFY_CLIENT_ID" >> .env
-	@echo "SPOTIFY_CLIENT_SECRET" >> .env
-	@echo "SPOTIFY_USERNAME" >> .env
-	@echo "SPOTIFY_REDIRECT_URI" >> .env
-	@echo "SPOTIFY_PLAYLIST_ID	" >> .env
-	@echo "SCORE_CUTOFF	" >> .env
-	@echo "NUMBER_OF_PAGES" >> .env
-	@echo "SUPRESS_SCRAPING_ERRORS" >> .env
+	@echo "SPOTIFY_CLIENT_ID=" >> .env
+	@echo "SPOTIFY_CLIENT_SECRET=" >> .env
+	@echo "SPOTIFY_USERNAME=" >> .env
+	@echo "SPOTIFY_REDIRECT_URI=" >> .env
+	@echo "SPOTIFY_PLAYLIST_ALL_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_50_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_45_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_40_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_35_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_30_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_25_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_20_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_15_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_10_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_05_ID=" >> .env
+	@echo "SPOTIFY_PLAYLIST_00_ID=" >> .env
+	@echo "NUMBER_OF_PAGES=" >> .env
+	@echo "SUPRESS_SCRAPING_ERRORS=" >> .env
 
 check:
 	flake8 $(TARGETS)
