@@ -7,7 +7,6 @@ import spotipy.util as util
 from angrymetalguy_to_spotify.configuration import (
     SPOTIFY_CLIENT_ID,
     SPOTIFY_CLIENT_SECRET,
-    SPOTIFY_PLAYLIST_00_ID,
     SPOTIFY_PLAYLIST_05_ID,
     SPOTIFY_PLAYLIST_10_ID,
     SPOTIFY_PLAYLIST_15_ID,
@@ -23,7 +22,7 @@ from angrymetalguy_to_spotify.configuration import (
     SPOTIFY_REDIRECT_URI,
     SPOTIFY_USERNAME,
 )
-from angrymetalguy_to_spotify.constants import DAYS_CUTOFF, SCORE_CUTOFF
+from angrymetalguy_to_spotify.constants import SCORE_CUTOFF
 from angrymetalguy_to_spotify.spotify.manager import PlaylistManager
 from angrymetalguy_to_spotify.utils.logger import get_logger
 
@@ -41,47 +40,51 @@ def add_to_playlist(reviews: Dict[float, List[Dict[str, str]]]) -> None:
 
     spotify = _connect()
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_00_ID)
-    manager.add_to_playlist(reviews["0.0"])
-
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_05_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_05_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["0.5"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_10_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_10_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["1.0"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_10_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_10_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["1.0"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_15_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_15_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["1.5"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_20_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_20_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["2.0"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_25_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_25_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["2.5"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_30_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_30_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["3.0"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_35_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_35_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["3.5"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_40_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_40_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["4.0"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_45_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_45_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["4.5"])
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_50_ID)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_50_ID, old_albums_limit_in_days=365)
     manager.add_to_playlist(reviews["5.0"])
 
     # Prepping data for "special" playlists
     flattened = []
     four_or_more = []
     for key, value in reviews.items():
-        if float(key) >= SCORE_CUTOFF:
+
+        try:
+            converted = float(key)
+        except Exception:
+            logger.warning(f"Key {key} cannot be converted to float. Ignoring...")
+            continue
+
+        if converted >= SCORE_CUTOFF:
             four_or_more += value
 
         flattened += value
@@ -89,7 +92,7 @@ def add_to_playlist(reviews: Dict[float, List[Dict[str, str]]]) -> None:
     manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_ALL_ID)
     manager.add_to_playlist(flattened)
 
-    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_ROTATION_ID, old_albums_limit_in_days=DAYS_CUTOFF)
+    manager = PlaylistManager(spotify, SPOTIFY_PLAYLIST_ROTATION_ID, old_albums_limit_in_days=60)
     manager.add_to_playlist(four_or_more)
     manager.remove_old_tracks()
 

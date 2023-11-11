@@ -24,6 +24,3 @@ UNKNOWN_SCORE_VALUE = "unknown"
 
 # Albums below this score won't be added to the rotation playlist
 SCORE_CUTOFF = 4.0
-
-# Albums that have been in the rotation playlist for longer than this will be removed
-DAYS_CUTOFF = 60

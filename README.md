@@ -10,11 +10,6 @@ Contains all albums with ratings 4.0 (Great) and up. Tracks that have been in th
 - https://open.spotify.com/playlist/6aKz4X7BhEdKG7fsDqc4lA?si=fa3aca50eb6540f1
 
 
-## All Reviews
-
-Single playlist with all reviews this project could scrape from Angry Metal Guy.
-- https://open.spotify.com/playlist/0lrAAiYpVZAga5MFlwZMsd?si=5b6e7f0a1ec44a3e
-
 ## Score Based
 
 Reviews scraped by this project, categorized according to ratings:
@@ -28,11 +23,12 @@ Reviews scraped by this project, categorized according to ratings:
 - 1.5: https://open.spotify.com/playlist/4R1FkZg2VIvggB7k8dfaQ7?si=bf3243f7cff44927
 - 1.0: https://open.spotify.com/playlist/3tcK2Cu82wN3PaX3HBsF6d?si=eee906f67fea45a3
 - 0.5: https://open.spotify.com/playlist/40idhH9MGKuyNLMHDHcbT3?si=755a432a83b14c49
-- 0.0: https://open.spotify.com/playlist/1dWYf0PEbOcZFKgGEVLhOK?si=6bfed6d57613418f
+
+Tracks that have been in the playlist for more than `365` days are removed.
 
 ## Limitations
 
-Spotify might add, remove, or re-add albums to its catalog at any time. So if an album is missing from a playlist, this is the primary reason. The scraper is also not fail-proof; if a score can't be parsed, the album will simply be ignored. Some of the old posts also don't follow the same structure from today (due to re-designs) and the current version might not parse them correctly. PRs are always welcomed!
+Spotify might add, remove, or re-add albums to its catalog at any time. So if an album is missing from a playlist, this is the primary reason. The scraper is also not fail-proof; if a score can't be parsed, the album will simply be ignored. If there's any layout changes to the website, the scraper will have to be manually cleaned.
 
 ## Setup
 

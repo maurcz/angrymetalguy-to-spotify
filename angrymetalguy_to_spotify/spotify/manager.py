@@ -5,7 +5,6 @@ from typing import Dict, List, Set
 import spotipy
 
 from angrymetalguy_to_spotify.configuration import SPOTIFY_USERNAME
-from angrymetalguy_to_spotify.constants import DAYS_CUTOFF
 from angrymetalguy_to_spotify.utils.logger import get_logger
 
 logger = get_logger()
@@ -101,7 +100,7 @@ class PlaylistManager:
 
             # Marking albums that have been in the playlist for a while
             added_at = datetime.strptime(track["added_at"], "%Y-%m-%dT%H:%M:%SZ")
-            date_cutoff = datetime.utcnow() - timedelta(days=DAYS_CUTOFF)
+            date_cutoff = datetime.utcnow() - timedelta(days=self._old_albums_limit_in_days)
 
             if added_at < date_cutoff:
                 old_tracks.append(track["track"]["id"])
