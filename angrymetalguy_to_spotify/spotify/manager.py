@@ -13,11 +13,11 @@ logger = get_logger()
 class PlaylistManager:
     """Interacts with Spotify Playlists"""
 
-    def __init__(self, spotify: spotipy.Spotify, playlist_id: str, old_albums_limit_in_days: int = 0):
+    def __init__(self, spotify: spotipy.Spotify, playlist_id: str, old_tracks_limit_in_days: int = 0):
         self._spotify = spotify
         self._playlist_id = playlist_id
         self._user = SPOTIFY_USERNAME
-        self._old_albums_limit_in_days = old_albums_limit_in_days  # 0 means no limits, no albums are cleaned up
+        self._old_tracks_limit_in_days = old_tracks_limit_in_days  # 0 means no tracks are removed
         self._albums_in_playlist, self._old_tracks_in_playlist = self._get_albums_in_playlist()
 
     def add_to_playlist(self, albums: List[Dict[str, str]]) -> None:
@@ -39,7 +39,7 @@ class PlaylistManager:
             for item in results["albums"]["items"]:
                 # Skips if album already in playlist
                 if item["id"] in self._albums_in_playlist:
-                    logger.info(f"{album['album']} - {album['band']} already in playlist.")
+                    logger.info(f"{album['band']} - {album['album']} already in playlist.")
                     break
 
                 # No API to add an album by name, must add a group of tracks
@@ -49,14 +49,14 @@ class PlaylistManager:
 
                 self._spotify.user_playlist_add_tracks(SPOTIFY_USERNAME, self._playlist_id, tracks_ids)
 
-                logger.info(f"{album['album']} - {album['band']} added to playlist.")
+                logger.info(f"{album['band']} - {album['album']} added to playlist.")
 
     def remove_old_tracks(self) -> None:
         """
-        Removes all tracks that have been sitting on the playlist for more than `self._old_albums_limit_in_days`
+        Removes all tracks that have been sitting on the playlist for more than `self._old_tracks_limit_in_days`
         """
         self._spotify.user_playlist_remove_all_occurrences_of_tracks(self._user, self._playlist_id, self._old_tracks_in_playlist)
-        logger.info(f"Removed tracks older than {self._old_albums_limit_in_days} days from playlist {self._playlist_id}")
+        logger.info(f"Removed tracks older than {self._old_tracks_limit_in_days} days from playlist {self._playlist_id}")
 
     def _get_albums_in_playlist(self) -> Set[str]:
         """Gets albums currently in the playlist. This is necessary to avoid
@@ -66,7 +66,7 @@ class PlaylistManager:
         -------
         Tuple(Set[str], Set[str])
             Set[str] - ids of albums already in the playlist
-            Set[str] - ids of tracks that have been in the playslit for longer than `self._old_albums_limit_in_days`
+            Set[str] - ids of tracks that have been in the playslit for longer than `self._old_tracks_limit_in_days`
         """
 
         all_tracks = []
@@ -74,8 +74,8 @@ class PlaylistManager:
         unique_albums = set()
         old_tracks = []
 
-        # There's a limit of 100 tracks per request. This `for` will *always* hit the `break`, unless
-        # the playlist has ~~922337203685477580700 tracks
+        # Spotify has a limit of 100 tracks per request. This `for` will *always* hit the `break`,
+        # unless the playlist has ~~922337203685477580700 tracks
         for _ in range(0, sys.maxsize):
             results = self._spotify.user_playlist_tracks(
                 user=self._user,
@@ -94,13 +94,13 @@ class PlaylistManager:
             # Simplifying deduping with a set.
             unique_albums.add(track["track"]["album"]["id"])
 
-            # 0 means no albums should be considered for cleanup
-            if self._old_albums_limit_in_days == 0:
+            # 0 means no tracks should be considered for cleanup
+            if self._old_tracks_limit_in_days == 0:
                 continue
 
-            # Marking albums that have been in the playlist for a while
+            # Marking tracks that have been in the playlist for a while
             added_at = datetime.strptime(track["added_at"], "%Y-%m-%dT%H:%M:%SZ")
-            date_cutoff = datetime.utcnow() - timedelta(days=self._old_albums_limit_in_days)
+            date_cutoff = datetime.utcnow() - timedelta(days=self._old_tracks_limit_in_days)
 
             if added_at < date_cutoff:
                 old_tracks.append(track["track"]["id"])
