@@ -1,7 +1,7 @@
 import logging
 
-def get_logger():
 
+def get_logger():
     logger = logging.getLogger("amg-to-spotify")
 
     if not logger.hasHandlers():

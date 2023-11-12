@@ -110,7 +110,7 @@ def _parse_score(entry_content: Tag) -> str:
         score = rating.group(1).strip()
 
         # First check if it's a simple float (pattern will match values like '1.5', '4.0', etc)
-        if bool(re.match(r'^\d+\.\d+$', score)):
+        if bool(re.match(r"^\d+\.\d+$", score)):
             return score
 
         # Check if a word was used for scoring
@@ -118,7 +118,7 @@ def _parse_score(entry_content: Tag) -> str:
             return RATING_SYSTEM[score]
 
         # Check again if it's a word, but filter anything that's not letters
-        cleaned_score = re.sub('[^a-zA-Z]', '', score)
+        cleaned_score = re.sub("[^a-zA-Z]", "", score)
         if cleaned_score in RATING_SYSTEM:
             return RATING_SYSTEM[cleaned_score]
 

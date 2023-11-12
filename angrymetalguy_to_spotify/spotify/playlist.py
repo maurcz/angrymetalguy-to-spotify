@@ -106,7 +106,7 @@ def _connect() -> spotipy.Spotify:
 
 
 def _filter_by_score(reviews: Dict[float, List[Dict[str, str]]], score_cutoff: int) -> List[Dict[str, str]]:
-    """ Filters reviews based on a `score_cutoff`. Only scores that are greater than the cutoff will
+    """Filters reviews based on a `score_cutoff`. Only scores that are greater than the cutoff will
     be present in the returning list.
 
     Parameters
