@@ -104,7 +104,7 @@ def _parse_score(entry_content: Tag) -> str:
     # - Rating: X.X
     # - Rating: Great
     # This pattern matches "Rating: " + either words or numbers with decimal points
-    rating = re.search("Rating:\s*([\w.]+)", text)  # noqa
+    rating = re.search(r"Rating:\s*([\w.]+)", text)
 
     try:
         score = rating.group(1).strip()
