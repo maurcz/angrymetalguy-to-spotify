@@ -36,11 +36,9 @@ Follow this section if you want to try running this project locally. Feel free t
 
 Before we get into specifics, here's an overview of some of the tools that are used by this project:
 
-- You'll need [poetry](https://python-poetry.org/) for dependency management.
-- `make venv` to create a local environment.
-    - This requires `poetry` for dep management. I recommend installing `poetry` using [pipx](https://www.youtube.com/watch?v=FyA4i_dP934).
-    - If you don't use [virtualenv](https://virtualenv.pypa.io/en/latest/), create the python environment using whatever you like.
-        - Note that you'll still have to run `poetry install` inside the enviroment.
+- You'll need [uv](https://docs.astral.sh/uv/) for dependency management.
+- `make venv` to create a local environment (creates `.venv` and installs all deps including dev tools).
+    - I recommend installing `uv` using [the official installer](https://docs.astral.sh/uv/getting-started/installation/) or [pipx](https://www.youtube.com/watch?v=FyA4i_dP934).
 - All credentials and configs are read from env vars. Use `make .env` to create a local `.env` file with the variables you need. Fill out with your own information / configs.
 
 ### Spotipy Setup

@@ -26,19 +26,18 @@ FILES:=$(TOP_LEVEL_SCRIPTS) $(shell find ./$(PACKAGE_NAME) -name '*.py')
 	@echo "SUPRESS_SCRAPING_ERRORS=" >> .env
 
 check:
-	flake8 $(TARGETS)
-	isort $(TARGETS) --check
-	black $(TARGETS) --check
+	uv run ruff check $(TARGETS)
+	uv run ruff format $(TARGETS) --check
 
 format:
-	black $(TARGETS)
-	isort $(TARGETS)
+	uv run ruff format $(TARGETS)
+	uv run ruff check $(TARGETS) --fix
 
 # This is just an example of a lambda deploy from local.
 # You have to export two vars to your local env:
 # - LOCAL_CACHE_FILE = The name of the `.cache-*` file generated after you've authenticated once
 # - LAMBDA_FUNCTION_NAME = The name of your lambda function
-# This command assumes you have both `poetry` and `aws` available in your terminal.
+# This command assumes you have both `uv` and `aws` available in your terminal.
 lambda-deploy:
 	rm -r -f .lambda/
 	rm -f lambda.zip
@@ -46,13 +45,12 @@ lambda-deploy:
 	cp run.py .lambda/
 	cp ${LOCAL_CACHE_FILE} .lambda/${LOCAL_CACHE_FILE}
 	cp -r angrymetalguy_to_spotify .lambda/angrymetalguy_to_spotify/
-	poetry export -f requirements.txt --output .lambda/requirements.txt
+	uv export --no-dev --output-file .lambda/requirements.txt
 	pip install -r .lambda/requirements.txt -t .lambda/
 	cd .lambda; zip -r ../lambda.zip .
 	aws lambda update-function-code --function-name ${LAMBDA_FUNCTION_NAME} --zip-file fileb://lambda.zip --no-cli-pager
 	rm -f lambda.zip
-	rm -r .lambda/
+	rm -r -f .lambda/
 
 venv:
-	virtualenv .venv --python=3.10
-	. .venv/bin/activate; poetry install;
+	uv sync --extra dev
