@@ -55,7 +55,11 @@ class PlaylistManager:
         """
         Removes all tracks that have been sitting on the playlist for more than `self._old_tracks_limit_in_days`
         """
-        self._spotify.user_playlist_remove_all_occurrences_of_tracks(self._user, self._playlist_id, self._old_tracks_in_playlist)
+        # Spotify caps removals at 100 track ids per request
+        chunk_size = 100
+        for i in range(0, len(self._old_tracks_in_playlist), chunk_size):
+            chunk = self._old_tracks_in_playlist[i : i + chunk_size]
+            self._spotify.user_playlist_remove_all_occurrences_of_tracks(self._user, self._playlist_id, chunk)
         logger.info(f"Removed tracks older than {self._old_tracks_limit_in_days} days from playlist {self._playlist_id}")
 
     def _get_albums_in_playlist(self) -> Set[str]:

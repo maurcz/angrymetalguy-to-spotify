@@ -24,6 +24,8 @@ FILES:=$(TOP_LEVEL_SCRIPTS) $(shell find ./$(PACKAGE_NAME) -name '*.py')
 	@echo "SPOTIFY_PLAYLIST_ROTATION_ID=" >> .env
 	@echo "NUMBER_OF_PAGES=" >> .env
 	@echo "SUPRESS_SCRAPING_ERRORS=" >> .env
+	@echo "LOCAL_CACHE_FILE=" >> .env
+	@echo "LAMBDA_FUNCTION_NAME=" >> .env
 
 check:
 	uv run ruff check $(TARGETS)
@@ -34,22 +36,26 @@ format:
 	uv run ruff check $(TARGETS) --fix
 
 # This is just an example of a lambda deploy from local.
-# You have to export two vars to your local env:
-# - LOCAL_CACHE_FILE = The name of the `.cache-*` file generated after you've authenticated once
-# - LAMBDA_FUNCTION_NAME = The name of your lambda function
+# Reads LOCAL_CACHE_FILE and LAMBDA_FUNCTION_NAME from your `.env` (or shell env).
 # This command assumes you have both `uv` and `aws` available in your terminal.
 lambda-deploy:
-	rm -r -f .lambda/
-	rm -f lambda.zip
-	mkdir .lambda/
-	cp run.py .lambda/
-	cp ${LOCAL_CACHE_FILE} .lambda/${LOCAL_CACHE_FILE}
-	cp -r angrymetalguy_to_spotify .lambda/angrymetalguy_to_spotify/
-	uv export --no-dev --output-file .lambda/requirements.txt
-	pip install -r .lambda/requirements.txt -t .lambda/
-	cd .lambda; zip -r ../lambda.zip .
-	aws lambda update-function-code --function-name ${LAMBDA_FUNCTION_NAME} --zip-file fileb://lambda.zip --no-cli-pager
-	rm -f lambda.zip
+	@test -f .env || { echo "Missing .env - run 'make .env' first"; exit 1; }
+	@set -e; \
+	eval "$$(grep -E '^(LOCAL_CACHE_FILE|LAMBDA_FUNCTION_NAME)=' .env)"; \
+	test -n "$$LOCAL_CACHE_FILE" || { echo "LOCAL_CACHE_FILE not set in .env"; exit 1; }; \
+	test -n "$$LAMBDA_FUNCTION_NAME" || { echo "LAMBDA_FUNCTION_NAME not set in .env"; exit 1; }; \
+	rm -r -f .lambda/; \
+	rm -f lambda.zip; \
+	mkdir .lambda/; \
+	cp run.py .lambda/; \
+	cp $$LOCAL_CACHE_FILE .lambda/$$LOCAL_CACHE_FILE; \
+	cp -r angrymetalguy_to_spotify .lambda/angrymetalguy_to_spotify/; \
+	uv export --no-dev --no-emit-project --output-file .lambda/requirements.txt; \
+	pip install -r .lambda/requirements.txt -t .lambda/; \
+	cd .lambda && zip -r ../lambda.zip . -x '*__pycache__*' -x '*.pyc'; \
+	cd ..; \
+	aws lambda update-function-code --function-name $$LAMBDA_FUNCTION_NAME --zip-file fileb://lambda.zip --no-cli-pager; \
+	rm -f lambda.zip; \
 	rm -r -f .lambda/
 
 venv:

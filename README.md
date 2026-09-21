@@ -71,7 +71,12 @@ You can change the behavior of this app by changing the following inside `.env`:
 
 I use a combo of AWS Lambda and Amazon EventBrige to run this app on a schedule. To simplify the deployment process, I've added a `make lambda-deploy` command that creates a `zip` file with the code and all dependencies, then uploads to your lambda using the [aws](https://aws.amazon.com/cli/) cli.
 
-Add the values you have in your local `.env` file as Environment Variables in the lambda configuration.
+Before deploying, add the following to your local `.env`:
+
+- `LOCAL_CACHE_FILE`: The name of the `.cache-*` file generated after you've authenticated once (e.g. `.cache-<your-spotify-username>`).
+- `LAMBDA_FUNCTION_NAME`: The name of your AWS Lambda function.
+
+`make lambda-deploy` reads these from `.env` (no need to export them in your shell). Add the values you have in your local `.env` file as Environment Variables in the lambda configuration.
 
 Note that you **must** have a local `.cache-*` file created before uploading this to lambda, otherwise spotipy _won't_ work. I'd rather have this as an env var or something, but couldn't find any alternatives. It's a compromise, but this file only holds a temporary key that expires very quickly, refreshing every new time you try to access by using your ClientID + ClientSecret. The scope of the access is also decreased as much as possible (can only modify playlists and nothing else).
 
